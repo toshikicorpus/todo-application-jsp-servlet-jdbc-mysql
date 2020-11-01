@@ -11,6 +11,7 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import net.javaguides.todoapp.dao.TodoDao;
 import net.javaguides.todoapp.dao.TodoDaoImpl;
@@ -34,13 +35,18 @@ public class TodoController extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		String action = request.getServletPath();
+		System.out.println("gopost/");
+		System.out.println(action);
+		
 		doGet(request, response);
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
 		String action = request.getServletPath();
-
+		System.out.println("doget/");
+		System.out.println(action);
 		try {
 			switch (action) {
 			case "/new":
@@ -52,18 +58,35 @@ public class TodoController extends HttpServlet {
 			case "/delete":
 				deleteTodo(request, response);
 				break;
+			case "/mytodo":
+				userTodo(request, response);
+				break;
 			case "/edit":
 				showEditForm(request, response);
 				break;
 			case "/update":
 				updateTodo(request, response);
 				break;
-			case "/list":
+			case "/":
 				listTodo(request, response);
 				break;
+			case "/logout":
+				userLogout(request, response);
+				break;
 			default:
-				RequestDispatcher dispatcher = request.getRequestDispatcher("login/login.jsp");
-				dispatcher.forward(request, response);
+				HttpSession session = request.getSession();
+				String login_id = (String)session.getAttribute("LOGIN_ID");
+				System.out.println(login_id);
+				RequestDispatcher dispatcher;
+				if(login_id==null) {
+					dispatcher = request.getRequestDispatcher("login/login.jsp");	
+					dispatcher.forward(request, response);
+				}else {
+					listTodo(request, response);	
+				}
+				
+				
+				
 				break;
 			}
 		} catch (SQLException ex) {
@@ -73,20 +96,69 @@ public class TodoController extends HttpServlet {
 
 	private void listTodo(HttpServletRequest request, HttpServletResponse response)
 			throws SQLException, IOException, ServletException {
-		List<Todo> listTodo = todoDAO.selectAllTodos();
-		request.setAttribute("listTodo", listTodo);
-		RequestDispatcher dispatcher = request.getRequestDispatcher("todo/todo-list.jsp");
+		
+		HttpSession session = request.getSession();
+		String login_id = (String)session.getAttribute("LOGIN_ID");
+		
+		System.out.println(login_id);
+		if(login_id!=null) {
+			
+			List<Todo> listTodo = todoDAO.selectAllTodos();
+			request.setCharacterEncoding("UTF-8");
+			request.setAttribute("listTodo", listTodo);
+			//RequestDispatcher dispatcher = request.getRequestDispatcher("/");
+			RequestDispatcher dispatcher = request.getRequestDispatcher("todo/todo-list.jsp");
+			dispatcher.forward(request, response);
+		}else {
+			response.sendRedirect("login/login.jsp");	
+		}
+		
+		
+	}
+	
+	private void userTodo(HttpServletRequest request, HttpServletResponse response)
+			throws SQLException, IOException, ServletException {
+		
+		HttpSession session = request.getSession();
+		String login_id = (String)session.getAttribute("LOGIN_ID");
+		
+		System.out.println(login_id);
+		if(login_id!=null) {
+			
+			List<Todo> listTodo = todoDAO.selectUserTodos(login_id);
+			request.setCharacterEncoding("UTF-8");
+			request.setAttribute("listTodo", listTodo);
+			//RequestDispatcher dispatcher = request.getRequestDispatcher("/");
+			RequestDispatcher dispatcher = request.getRequestDispatcher("todo/todo-list.jsp");
+			dispatcher.forward(request, response);
+		}else {
+			response.sendRedirect("login/login.jsp");	
+		}
+		
+		
+	}
+	
+	private void userLogout(HttpServletRequest request, HttpServletResponse response) 
+			throws SQLException,ServletException, IOException {
+		
+		HttpSession session = request.getSession();
+		session.setAttribute("LOGIN_ID",null);
+		
+		RequestDispatcher dispatcher = request.getRequestDispatcher("login/login.jsp");
 		dispatcher.forward(request, response);
+
 	}
 
 	private void showNewForm(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
 		RequestDispatcher dispatcher = request.getRequestDispatcher("todo/todo-form.jsp");
 		dispatcher.forward(request, response);
 	}
 
 	private void showEditForm(HttpServletRequest request, HttpServletResponse response)
 			throws SQLException, ServletException, IOException {
+		request.setCharacterEncoding("UTF-8");
 		int id = Integer.parseInt(request.getParameter("id"));
 		Todo existingTodo = todoDAO.selectTodo(id);
 		RequestDispatcher dispatcher = request.getRequestDispatcher("todo/todo-form.jsp");
@@ -96,13 +168,17 @@ public class TodoController extends HttpServlet {
 	}
 
 	private void insertTodo(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
-		
+		request.setCharacterEncoding("UTF-8");
 		String title = request.getParameter("title");
-		String username = request.getParameter("username");
+		HttpSession session = request.getSession();
+		String username= (String)session.getAttribute("LOGIN_ID");
+		//String username = request.getParameter("username");
 		String description = request.getParameter("description");
 		
 		/*DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-mm-dd");
 		LocalDate targetDate = LocalDate.parse(request.getParameter("targetDate"),df);*/
+		System.out.println(title);
+		System.out.println(description);
 		
 		boolean isDone = Boolean.valueOf(request.getParameter("isDone"));
 		Todo newTodo = new Todo(title, username, description, LocalDate.now(), isDone);
@@ -111,10 +187,13 @@ public class TodoController extends HttpServlet {
 	}
 
 	private void updateTodo(HttpServletRequest request, HttpServletResponse response) throws SQLException, IOException {
+		request.setCharacterEncoding("UTF-8");
 		int id = Integer.parseInt(request.getParameter("id"));
 		
 		String title = request.getParameter("title");
-		String username = request.getParameter("username");
+		HttpSession session = request.getSession();
+		String username= (String)session.getAttribute("LOGIN_ID");
+		//String username = request.getParameter("username");
 		String description = request.getParameter("description");
 		//DateTimeFormatter df = DateTimeFormatter.ofPattern("yyyy-mm-dd");
 		LocalDate targetDate = LocalDate.parse(request.getParameter("targetDate"));

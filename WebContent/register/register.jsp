@@ -1,9 +1,9 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-	pageEncoding="ISO-8859-1"%>
-<!DOCTYPE html>
+<%@ page language="java" contentType="text/html; charset=Windows-31J"
+	pageEncoding="UTF-8"%>
+	
 <html>
 <head>
-<meta charset="ISO-8859-1">
+<meta charset="utf-8">
 <title>Insert title here</title>
 
 <link rel="stylesheet"
@@ -19,9 +19,9 @@
 
 	<h2>User Register Form</h2>
 	<div class="col-md-6 col-md-offset-3">
-			<div class="alert alert-success center" role="alert">
-				<p>${NOTIFICATION}</p>
-			</div>
+		
+		
+		
 			
 				<form action="<%=request.getContextPath()%>/register" method="post">
 

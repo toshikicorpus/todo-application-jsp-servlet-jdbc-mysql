@@ -26,6 +26,7 @@ public class TodoDaoImpl implements TodoDao {
 
 	private static final String SELECT_TODO_BY_ID = "select id,title,username,description,target_date,is_done from todos where id =?";
 	private static final String SELECT_ALL_TODOS = "select * from todos";
+	private static final String SELECT_USER_TODOS = "select * from todos where username =?";
 	private static final String DELETE_TODO_BY_ID = "delete from todos where id = ?;";
 	private static final String UPDATE_TODO = "update todos set title = ?, username= ?, description =?, target_date =?, is_done = ? where id = ?;";
 
@@ -34,7 +35,7 @@ public class TodoDaoImpl implements TodoDao {
 
 	@Override
 	public void insertTodo(Todo todo) throws SQLException {
-		System.out.println(INSERT_TODOS_SQL);
+		
 		// try-with-resource statement will auto close the connection.
 		try (Connection connection = JDBCUtils.getConnection();
 				PreparedStatement preparedStatement = connection.prepareStatement(INSERT_TODOS_SQL)) {
@@ -89,6 +90,39 @@ public class TodoDaoImpl implements TodoDao {
 
 				// Step 2:Create a statement using connection object
 				PreparedStatement preparedStatement = connection.prepareStatement(SELECT_ALL_TODOS);) {
+			System.out.println(preparedStatement);
+			// Step 3: Execute the query or update query
+			ResultSet rs = preparedStatement.executeQuery();
+
+			// Step 4: Process the ResultSet object.
+			while (rs.next()) {
+				long id = rs.getLong("id");
+				String title = rs.getString("title");
+				String username = rs.getString("username");
+				String description = rs.getString("description");
+				LocalDate targetDate = rs.getDate("target_date").toLocalDate();
+				boolean isDone = rs.getBoolean("is_done");
+				todos.add(new Todo(id, title, username, description, targetDate, isDone));
+			}
+		} catch (SQLException exception) {
+			JDBCUtils.printSQLException(exception);
+		}
+		return todos;
+	}
+	
+	@Override
+	public List<Todo> selectUserTodos(String select_username) {
+
+		// using try-with-resources to avoid closing resources (boiler plate code)
+		List<Todo> todos = new ArrayList<>();
+
+		// Step 1: Establishing a Connection
+		try (Connection connection = JDBCUtils.getConnection();
+
+				// Step 2:Create a statement using connection object
+				PreparedStatement preparedStatement = connection.prepareStatement(SELECT_USER_TODOS);) {
+			
+				preparedStatement.setString(1,select_username);
 			System.out.println(preparedStatement);
 			// Step 3: Execute the query or update query
 			ResultSet rs = preparedStatement.executeQuery();

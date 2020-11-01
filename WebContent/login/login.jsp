@@ -1,9 +1,11 @@
-<%@ page language="java" contentType="text/html; charset=ISO-8859-1"
-	pageEncoding="ISO-8859-1"%>
+<%@ page language="java" contentType="text/html; charset=Windows-31J"
+	pageEncoding="UTF-8"%>
+	<%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c"%>
+
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="ISO-8859-1">
+<meta charset="utf-8">
 <title>Insert title here</title>
 <link rel="stylesheet"
 	href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
@@ -14,7 +16,13 @@
 
 	<jsp:include page="../common/header.jsp"></jsp:include>
 	<div class="container col-md-8 col-md-offset-3" style="overflow: auto">
+		<c:if test="${NOTIFICATION}" >
+			<div class="alert alert-success center" role="alert">
+				<p>${NOTIFICATION}</p>
+			</div>
+		</c:if>
 		<h1>Login Form</h1>
+		
 		<form action="<%=request.getContextPath()%>/login" method="post">
 
 			<div class="form-group">

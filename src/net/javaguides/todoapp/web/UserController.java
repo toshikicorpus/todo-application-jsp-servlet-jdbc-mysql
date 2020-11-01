@@ -27,11 +27,18 @@ public class UserController extends HttpServlet {
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		String action = request.getServletPath();
+		System.out.println("registerdopost");
+		System.out.println(action);
 		register(request, response);
 	}
 
 	protected void doGet(HttpServletRequest request, HttpServletResponse response)
 			throws ServletException, IOException {
+		String action = request.getServletPath();
+		System.out.println("registerdoget");
+		System.out.println(action);
+		
 		response.sendRedirect("register/register.jsp");
 	}
 
@@ -58,7 +65,8 @@ public class UserController extends HttpServlet {
 			e.printStackTrace();
 		}
 
-		RequestDispatcher dispatcher = request.getRequestDispatcher("register/register.jsp");
+		//RequestDispatcher dispatcher = request.getRequestDispatcher("register/register.jsp");
+		RequestDispatcher dispatcher = request.getRequestDispatcher("login/login.jsp");
 		dispatcher.forward(request, response);
 	}
 }
